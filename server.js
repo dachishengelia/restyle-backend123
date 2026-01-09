@@ -104,7 +104,7 @@ const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.FRONTEND_VERCEL_URL,
   "http://localhost:5173",
-  "https://re-style-backend.vercel.app"
+  "https://restyle-backend123.vercel.app"
 ];
 
 app.use(cors({
