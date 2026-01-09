@@ -98,6 +98,7 @@ import CartRoutes from "./routes/CartRoutes.js";
 import productRoutes from "./routes/Product.js";
 import productActionsRoutes from "./routes/productActions.js";
 import checkoutRoutes from "./routes/checkout.js";
+import usersRoutes from "./routes/users.js";
 import connectToDb from "./db/connectToDB.js";
 
 const allowedOrigins = [
@@ -117,14 +118,14 @@ app.use(cors({
     }
   },
   credentials: true,
-  methods: ["GET","POST","PUT","DELETE","OPTIONS"]
+  methods: ["GET","POST","PUT","DELETE","PATCH","OPTIONS"]
 }));
 
 // Handle preflight requests
 app.options("*", cors({
   origin: allowedOrigins,
   credentials: true,
-  methods: ["GET","POST","PUT","DELETE","OPTIONS"]
+  methods: ["GET","POST","PUT","DELETE","PATCH","OPTIONS"]
 }));
 
 app.use(express.json());
@@ -141,6 +142,7 @@ app.use("/seller", SellerRoutes);
 app.use("/api/cart", CartRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/checkout", checkoutRoutes); // ✅ Only this line
+app.use("/users", usersRoutes);
 
 app.get("/", (req, res) => {
   res.send(`
