@@ -160,7 +160,7 @@ router.patch("/:id", isAuth, isSeller, async (req, res) => {
     return res.status(400).json({ message: "Invalid product ID format" });
   }
 
-  const { name, price, description, category, sizes, colors } = req.body;
+  const { name, price, description, category, imageUrl, sizes, colors } = req.body;
 
   // Validate required fields if provided
   if (name !== undefined && !name.trim()) {
@@ -175,6 +175,9 @@ router.patch("/:id", isAuth, isSeller, async (req, res) => {
   if (category !== undefined && !category.trim()) {
     return res.status(400).json({ message: "Category cannot be empty" });
   }
+  if (imageUrl !== undefined && typeof imageUrl !== 'string') {
+    return res.status(400).json({ message: "Image URL must be a string" });
+  }
 
   try {
     const updateFields = {};
@@ -182,6 +185,7 @@ router.patch("/:id", isAuth, isSeller, async (req, res) => {
     if (price !== undefined) updateFields.price = price;
     if (description !== undefined) updateFields.description = description.trim();
     if (category !== undefined) updateFields.category = category.trim();
+    if (imageUrl !== undefined) updateFields.imageUrl = imageUrl.trim();
     if (sizes !== undefined) updateFields.sizes = Array.isArray(sizes) ? sizes : [];
     if (colors !== undefined) updateFields.colors = Array.isArray(colors) ? colors : [];
 
