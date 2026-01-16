@@ -131,6 +131,7 @@ app.options("*", cors({
 }));
 
 app.use(express.json({
+  limit: '10mb',
   verify: (req, res, buf) => {
     if (req.originalUrl === '/api/checkout/webhook') {
       req.rawBody = buf.toString();
