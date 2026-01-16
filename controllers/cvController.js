@@ -72,26 +72,33 @@ export const checkoutCV = async (req, res) => {
 
   try {
     // Check if user already has a CV
-    const existingCV = await CV.findOne({ userId: req.userId });
-    if (existingCV) {
-      return res.status(400).json({
-        message: "User already has a CV. Only one CV per user is allowed."
+    let cv = await CV.findOne({ userId: req.userId });
+    if (cv) {
+      // Update existing CV
+      cv.height = parseFloat(height);
+      cv.weight = parseFloat(weight);
+      cv.nationality = nationality;
+      cv.languages = languages;
+      cv.instagram = instagram || null;
+      cv.email = email;
+      cv.profileImage = profileImage;
+      cv.description = description || null;
+      cv.isPublished = false; // Reset to unpublished to allow republishing
+    } else {
+      // Create new CV
+      cv = new CV({
+        userId: req.userId,
+        height: parseFloat(height),
+        weight: parseFloat(weight),
+        nationality,
+        languages,
+        instagram: instagram || null,
+        email,
+        profileImage,
+        description: description || null,
+        isPublished: false,
       });
     }
-
-    // Create CV with isPublished: false
-    const cv = new CV({
-      userId: req.userId,
-      height: parseFloat(height),
-      weight: parseFloat(weight),
-      nationality,
-      languages,
-      instagram: instagram || null,
-      email,
-      profileImage,
-      description: description || null,
-      isPublished: false,
-    });
 
     await cv.save();
 
