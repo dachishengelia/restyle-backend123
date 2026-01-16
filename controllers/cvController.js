@@ -119,8 +119,8 @@ export const checkoutCV = async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.FRONTEND_URL}/success`,
-      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+      success_url: `${process.env.FRONTEND_VERCEL_URL}/success`,
+      cancel_url: `${process.env.FRONTEND_VERCEL_URL}/cancel`,
       metadata: {
         type: "cv",
         cvId: cv._id.toString(),
