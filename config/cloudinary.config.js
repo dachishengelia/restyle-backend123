@@ -19,8 +19,8 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary,
   params: {
-    folder: 'uploads',
-    allowed_formats: ['jpg', 'png', 'jpeg', 'svg'],
+    // folder: 'uploads', // Upload to root for now
+    // allowed_formats: ['jpg', 'png', 'jpeg', 'svg'], // Allow any format for now
   },
 });
 

@@ -1,6 +1,6 @@
 import express from "express";
 import isAuth from "../middlewares/isAuth.middleware.js";
-import { addCV, checkoutCV, getMarketplace, getMyCV, publishCV } from "../controllers/cvController.js";
+import { addCV, checkoutCV, getMarketplace, getMyCV, getUserCVs, publishCV } from "../controllers/cvController.js";
 import { upload } from "../config/cloudinary.config.js";
 
 const router = express.Router();
@@ -36,12 +36,17 @@ router.post("/checkout", isAuth, checkoutCV);
 router.get("/marketplace", getMarketplace);
 
 /* =======================
-    GET MY CV
+     GET MY CV
 ======================= */
 router.get("/my-cv", isAuth, getMyCV);
 
 /* =======================
-    PUBLISH CV
+     GET USER CVS
+======================= */
+router.get("/user", isAuth, getUserCVs);
+
+/* =======================
+     PUBLISH CV
 ======================= */
 router.put("/publish/:cvId", isAuth, publishCV);
 

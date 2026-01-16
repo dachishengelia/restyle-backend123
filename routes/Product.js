@@ -130,7 +130,7 @@ router.post("/upload", upload.single("image"), async (req, res) => {
 });
 
 /* =======================
-   UPDATE PRODUCT IMAGE
+    UPDATE PRODUCT IMAGE
 ======================= */
 router.patch("/:id/image", isAuth, isSeller, async (req, res) => {
   try {
@@ -148,6 +148,56 @@ router.patch("/:id/image", isAuth, isSeller, async (req, res) => {
     res.json({ message: "Product image updated successfully", product });
   } catch (err) {
     res.status(500).json({ message: "Failed to update product image" });
+  }
+});
+
+/* =======================
+    UPDATE PRODUCT DETAILS
+======================= */
+router.patch("/:id", isAuth, isSeller, async (req, res) => {
+  const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid product ID format" });
+  }
+
+  const { name, price, description, category, sizes, colors } = req.body;
+
+  // Validate required fields if provided
+  if (name !== undefined && !name.trim()) {
+    return res.status(400).json({ message: "Name cannot be empty" });
+  }
+  if (price !== undefined && (isNaN(price) || price < 0)) {
+    return res.status(400).json({ message: "Price must be a positive number" });
+  }
+  if (description !== undefined && !description.trim()) {
+    return res.status(400).json({ message: "Description cannot be empty" });
+  }
+  if (category !== undefined && !category.trim()) {
+    return res.status(400).json({ message: "Category cannot be empty" });
+  }
+
+  try {
+    const updateFields = {};
+    if (name !== undefined) updateFields.name = name.trim();
+    if (price !== undefined) updateFields.price = price;
+    if (description !== undefined) updateFields.description = description.trim();
+    if (category !== undefined) updateFields.category = category.trim();
+    if (sizes !== undefined) updateFields.sizes = Array.isArray(sizes) ? sizes : [];
+    if (colors !== undefined) updateFields.colors = Array.isArray(colors) ? colors : [];
+
+    const product = await Product.findOneAndUpdate(
+      { _id: id, sellerId: req.userId },
+      updateFields,
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found or unauthorized" });
+    }
+
+    res.json({ message: "Product updated successfully", product });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update product" });
   }
 });
 

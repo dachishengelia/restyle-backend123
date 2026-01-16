@@ -27,8 +27,8 @@ router.post("/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       line_items,
       mode: "payment",
-      success_url: `${process.env.FRONTEND_VERCEL_URL}/success`,
-      cancel_url: `${process.env.FRONTEND_VERCEL_URL}/cancel`,
+      success_url: `${process.env.FRONTEND_URL}/success`,
+      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
     });
 
     res.json({ url: session.url });
@@ -54,7 +54,8 @@ router.post("/webhook", async (req, res) => {
     const session = event.data.object;
     console.log("Checkout session completed:", session.id, "Metadata:", session.metadata);
 
-    // Check if it's a CV payment
+    // Commented out CV payment handling since CV uploading is now free
+    /*
     if (session.metadata?.type === "cv") {
       const cvId = session.metadata.cvId;
       console.log(`Processing CV payment for cvId: ${cvId}`);
@@ -72,6 +73,7 @@ router.post("/webhook", async (req, res) => {
       }
       return res.json({ received: true });
     }
+    */
 
     // Retrieve session with line items for product purchases
     const sessionWithLineItems = await stripe.checkout.sessions.retrieve(session.id, {

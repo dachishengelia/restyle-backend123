@@ -99,6 +99,7 @@ import productRoutes from "./routes/Product.js";
 import productActionsRoutes from "./routes/productActions.js";
 import checkoutRoutes from "./routes/checkout.js";
 import usersRoutes from "./routes/users.js";
+import profileRoutes from "./routes/profile.js";
 import cvRoutes from "./routes/CV.js";
 import connectToDb from "./db/connectToDB.js";
 
@@ -150,6 +151,7 @@ app.use("/api/cart", CartRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/checkout", checkoutRoutes); // ✅ Only this line
 app.use("/users", usersRoutes);
+app.use("/api/profile", profileRoutes);
 app.use("/api/cv", cvRoutes);
 
 app.get("/", (req, res) => {

@@ -102,7 +102,17 @@ export const checkoutCV = async (req, res) => {
 
     await cv.save();
 
-    // Create Stripe checkout session
+    // Publish the CV directly since uploading is now free
+    cv.isPublished = true;
+    await cv.save();
+
+    res.status(200).json({
+      message: "CV submitted and published successfully",
+      cv
+    });
+
+    // Commented out Stripe checkout session for CV
+    /*
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -119,8 +129,8 @@ export const checkoutCV = async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.FRONTEND_VERCEL_URL}/success`,
-      cancel_url: `${process.env.FRONTEND_VERCEL_URL}/cancel`,
+      success_url: `${process.env.FRONTEND_URL}/success`,
+      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
       metadata: {
         type: "cv",
         cvId: cv._id.toString(),
@@ -128,6 +138,7 @@ export const checkoutCV = async (req, res) => {
     });
 
     res.json({ url: session.url });
+    */
   } catch (err) {
     console.error("Error creating CV checkout:", err);
     res.status(500).json({
@@ -169,6 +180,22 @@ export const getMyCV = async (req, res) => {
     console.error("Error retrieving CV:", err);
     res.status(500).json({
       message: "Failed to retrieve CV",
+      error: err.message
+    });
+  }
+};
+
+export const getUserCVs = async (req, res) => {
+  try {
+    const cvs = await CV.find({ userId: req.userId });
+    res.status(200).json({
+      message: "User CVs retrieved successfully",
+      cvs
+    });
+  } catch (err) {
+    console.error("Error retrieving user CVs:", err);
+    res.status(500).json({
+      message: "Failed to retrieve user CVs",
       error: err.message
     });
   }
