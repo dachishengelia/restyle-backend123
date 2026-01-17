@@ -1,31 +1,12 @@
 import passport from "passport";
-import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import User from "../models/User.js";
+import "./google.strategy.js";
 
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "/api/auth/google/callback",
-    },
-    async (accessToken, refreshToken, profile, done) => {
-      try {
-        let user = await User.findOne({ email: profile.emails[0].value });
+passport.serializeUser((data, done) => {
+  done(null, data);
+});
 
-        if (!user) {
-          user = await User.create({
-            email: profile.emails[0].value,
-            name: profile.displayName,
-            avatar: profile.photos[0].value,
-            authProvider: "google",
-          });
-        }
+passport.deserializeUser((data, done) => {
+  done(null, data);
+});
 
-        done(null, user);
-      } catch (err) {
-        done(err, null);
-      }
-    }
-  )
-);
+export default passport;

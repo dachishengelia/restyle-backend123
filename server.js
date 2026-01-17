@@ -90,7 +90,7 @@ const app = express();
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-
+import passport from "./strategies/google.strategy.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import SellerRoutes from "./routes/seller.js";
@@ -139,6 +139,7 @@ app.use(express.json({
 }));
 app.use(cookieParser());
 app.use(express.static("public"));
+app.use(passport.initialize());
 
 console.log("Frontend URL:", process.env.FRONTEND_URL);
 
