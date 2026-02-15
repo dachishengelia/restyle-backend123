@@ -5,7 +5,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import Product from "../models/Product.js";
 import User from "../models/User.js";
 import isAuth, { isSeller, isAdmin } from "../middlewares/isAuth.middleware.js";
-import { upload, uploadMultiple, uploadToCloudinary, cleanupTempFile } from "../config/cloudinary.config.js";
+import { upload, uploadMultiple, uploadSingle, uploadToCloudinary, cleanupTempFile } from "../config/cloudinary.config.js";
 import { sendEmail } from "../utils/sendEmail.js";
 
 // Multer error handler wrapper
@@ -207,7 +207,35 @@ router.post("/", isAuth, isSeller, uploadMultiple, handleMulterError, async (req
 /* =======================
    UPLOAD PRODUCT IMAGE
 ======================= */
-router.post("/upload", isAuth, uploadMultiple, handleMulterError, async (req, res) => {
+// Custom middleware to handle both 'image' (singular) and 'images' (plural) field names
+const handleMultipartUpload = (req, res, next) => {
+  const uploadAny = multer({
+    storage: multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, require('path').join(require('os').tmpdir(), 'uploads'));
+      },
+      filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + require('path').extname(file.originalname));
+      }
+    }),
+    limits: { fileSize: 10 * 1024 * 1024 }
+  }).any();
+  
+  uploadAny(req, res, (err) => {
+    if (err) {
+      console.error("Multer error:", err);
+      return res.status(400).json({ message: err.message });
+    }
+    // Normalize: if single file uploaded, put it in req.files array
+    if (req.file) {
+      req.files = [req.file];
+    }
+    next();
+  });
+};
+
+router.post("/upload", isAuth, handleMultipartUpload, handleMulterError, async (req, res) => {
   console.log("Upload endpoint called");
   console.log("Files received:", req.files ? req.files.length : 0);
   console.log("Body keys:", Object.keys(req.body));

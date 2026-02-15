@@ -72,6 +72,12 @@ const uploadMultiple = multer({
   limits: { fileSize: 10 * 1024 * 1024 }
 }).array('images', 5);
 
+// Also support single file upload with 'image' field name for backward compatibility
+const uploadSingle = multer({ 
+  storage: diskStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }
+}).single('image');
+
 const uploadToCloudinary = async (file) => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -121,4 +127,4 @@ const deleteFromCloudinary = async (publicId) => {
   }
 };
 
-export { upload, uploadMultiple, uploadToCloudinary, deleteFromCloudinary, cleanupTempFile };
+export { upload, uploadMultiple, uploadSingle, uploadToCloudinary, deleteFromCloudinary, cleanupTempFile };
