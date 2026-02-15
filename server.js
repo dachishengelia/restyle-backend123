@@ -171,8 +171,42 @@ app.get("/", (req, res) => {
   `);
 });
 
+// Global error handler - ensure all errors return JSON
+app.use((err, req, res, next) => {
+  console.error("Global error handler:", err);
+  
+  // Check if response is already sent
+  if (res.headersSent) {
+    return next(err);
+  }
+  
+  // Return JSON error response
+  res.status(err.status || 500).json({
+    message: err.message || "Internal Server Error",
+    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
+});
+
 const PORT = process.env.PORT || 3000;
 
+// Graceful port handling for development (avoid EADDRINUSE)
+const startServer = (port) => {
+  const server = app.listen(port, () => {
+    console.log(`Server running locally on port ${port}`);
+  });
+  
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE' && port < 3010) {
+      console.log(`Port ${port} in use, trying ${port + 1}...`);
+      startServer(port + 1);
+    } else {
+      console.error('Server error:', err);
+    }
+  });
+  
+  return server;
+};
+
 connectToDb().then(() => {
-  app.listen(PORT, () => console.log(`Server running locally on port ${PORT}`));
+  startServer(PORT);
 });

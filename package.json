@@ -4,7 +4,10 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "kill": "lsof -ti:3000 | xargs kill -9 2>/dev/null || true",
+    "restart": "lsof -ti:3000 | xargs kill -9 2>/dev/null || true && node server.js"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
