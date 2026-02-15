@@ -1,6 +1,8 @@
 import express from "express";
 import mongoose from "mongoose";
 import multer from 'multer';
+import path from 'path';
+import os from 'os';
 import { v2 as cloudinary } from 'cloudinary';
 import Product from "../models/Product.js";
 import User from "../models/User.js";
@@ -212,11 +214,11 @@ const handleMultipartUpload = (req, res, next) => {
   const uploadAny = multer({
     storage: multer.diskStorage({
       destination: function (req, file, cb) {
-        cb(null, require('path').join(require('os').tmpdir(), 'uploads'));
+        cb(null, path.join(os.tmpdir(), 'uploads'));
       },
       filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, uniqueSuffix + require('path').extname(file.originalname));
+        cb(null, uniqueSuffix + path.extname(file.originalname));
       }
     }),
     limits: { fileSize: 10 * 1024 * 1024 }
