@@ -16,7 +16,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 // Update username and/or password
 // ------------------------------
 router.patch("/update", isAuth, async (req, res) => {
-  const { username, currentPassword, newPassword } = req.body;
+  const { username, currentPassword, newPassword, bio } = req.body;
 
   try {
     const user = await User.findById(req.userId);
@@ -43,6 +43,11 @@ router.patch("/update", isAuth, async (req, res) => {
       user.password = await bcrypt.hash(newPassword, salt);
     }
 
+    // Update bio
+    if (bio !== undefined) {
+      user.bio = bio;
+    }
+
     await user.save();
 
     res.json({
@@ -53,6 +58,7 @@ router.patch("/update", isAuth, async (req, res) => {
         email: user.email,
         role: user.role,
         avatar: user.avatar,
+        bio: user.bio,
       },
     });
   } catch (err) {
@@ -86,6 +92,37 @@ router.patch("/update-avatar", isAuth, upload.single("avatar"), async (req, res)
     });
   } catch (err) {
     console.error("Avatar upload error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ------------------------------
+// Update splash screen only
+// ------------------------------
+router.patch("/update-splash", isAuth, upload.single("splashScreen"), async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (!req.file || !req.file.path) return res.status(400).json({ message: "No image uploaded" });
+
+    user.splashScreen = req.file.path;
+    await user.save();
+
+    res.json({
+      message: "Splash screen updated successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        bio: user.bio,
+        splashScreen: user.splashScreen,
+      },
+    });
+  } catch (err) {
+    console.error("Splash screen upload error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });

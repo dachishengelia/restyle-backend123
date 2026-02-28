@@ -7,6 +7,7 @@ const UserSchema = new mongoose.Schema({
   password: String,
   role: { type: String, default: "user" },
   avatar: { type: String, default: "/default-avatar.png" },
+  splashScreen: { type: String, default: "" },
   bio: { type: String, default: "" },
   createdAt: { type: Date, default: Date.now },
   cart: [
