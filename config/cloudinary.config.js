@@ -78,10 +78,10 @@ const uploadSingle = multer({
   limits: { fileSize: 10 * 1024 * 1024 }
 }).single('image');
 
-const uploadToCloudinary = async (file) => {
+const uploadToCloudinary = async (file, folder = 'restyle-products') => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder: 'restyle-products' },
+      { folder },
       (error, result) => {
         if (error) {
           console.error('Cloudinary upload error:', error);

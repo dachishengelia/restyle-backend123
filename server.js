@@ -101,6 +101,7 @@ import checkoutRoutes from "./routes/checkout.js";
 import usersRoutes from "./routes/users.js";
 import profileRoutes from "./routes/profile.js";
 import cvRoutes from "./routes/CV.js";
+import cvActionsRoutes from "./routes/cvActions.js";
 import statsRoutes from "./routes/stats.js";
 import reviewsRoutes from "./routes/reviews.js";
 import favoritesRoutes from "./routes/favorites.js";
@@ -159,6 +160,7 @@ app.use("/api/checkout", checkoutRoutes); // ✅ Only this line
 app.use("/api/users", usersRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/cv", cvRoutes);
+app.use("/api/cv-actions", cvActionsRoutes);
 app.use("/api/stats", statsRoutes);
 app.use("/api/reviews", reviewsRoutes);
 app.use("/api/favorites", favoritesRoutes);

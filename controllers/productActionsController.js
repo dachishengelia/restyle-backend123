@@ -118,6 +118,7 @@ export const addComment = async (req, res) => {
     const comment = {
       userId: req.user._id,
       username: req.user.username,  // Ensure this is the username, not email
+      avatar: req.user.avatar || "/default-avatar.png",
       text: text.trim(),
     };
 

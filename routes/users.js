@@ -6,7 +6,7 @@ import mongoose from "mongoose";
 import User from "../models/User.js";
 import Product from "../models/Product.js";
 import CV from "../models/CV.js";
-import { upload } from "../config/cloudinary.config.js";
+import { upload, uploadToCloudinary, cleanupTempFile } from "../config/cloudinary.config.js";
 import isAuth from "../middlewares/isAuth.middleware.js";
 
 const router = express.Router();
@@ -97,7 +97,7 @@ router.patch("/update-avatar", isAuth, upload.single("avatar"), async (req, res)
 });
 
 // ------------------------------
-// Update splash screen only
+// Update splash screen only (upload to Cloudinary)
 // ------------------------------
 router.patch("/update-splash", isAuth, upload.single("splashScreen"), async (req, res) => {
   try {
@@ -106,7 +106,13 @@ router.patch("/update-splash", isAuth, upload.single("splashScreen"), async (req
 
     if (!req.file || !req.file.path) return res.status(400).json({ message: "No image uploaded" });
 
-    user.splashScreen = req.file.path;
+    // Upload to Cloudinary
+    const splashScreenUrl = await uploadToCloudinary(req.file, 'restyle-splash-screens');
+
+    // Clean up temp file
+    cleanupTempFile(req.file.path);
+
+    user.splashScreen = splashScreenUrl;
     await user.save();
 
     res.json({
@@ -123,7 +129,36 @@ router.patch("/update-splash", isAuth, upload.single("splashScreen"), async (req
     });
   } catch (err) {
     console.error("Splash screen upload error:", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Failed to update splash screen" });
+  }
+});
+
+// ------------------------------
+// Remove splash screen
+// ------------------------------
+router.delete("/update-splash", isAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.splashScreen = "";
+    await user.save();
+
+    res.json({
+      message: "Splash screen removed successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        avatar: user.avatar,
+        bio: user.bio,
+        splashScreen: user.splashScreen,
+      },
+    });
+  } catch (err) {
+    console.error("Remove splash screen error:", err);
+    res.status(500).json({ message: "Failed to remove splash screen" });
   }
 });
 

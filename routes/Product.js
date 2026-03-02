@@ -543,6 +543,7 @@ router.post("/:id/comment", isAuth, async (req, res) => {
     product.comments.push({
       userId: req.userId,
       username: user?.username || "Unknown",
+      avatar: user?.avatar || "/default-avatar.png",
       text,
       createdAt: new Date(),
     });
