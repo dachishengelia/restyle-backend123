@@ -35,9 +35,10 @@ function sendTokenCookie(res, user) {
 }
 
 /* ===========================
-   REGISTER
+   REGISTER / SIGN UP
 =========================== */
-router.post("/register", async (req, res) => {
+// Shared handler for both /register and /sign-up
+const registerHandler = async (req, res) => {
   const { username, email, password, role } = req.body;
 
   if (!username || !email || !password) {
@@ -47,18 +48,15 @@ router.post("/register", async (req, res) => {
   try {
     await connectToDatabase();
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     const user = await User.create({
       username,
-      email,
-      password: hashedPassword,
+      email: email.toLowerCase(),
+      password,
       role: role || "buyer",
     });
 
@@ -72,13 +70,16 @@ router.post("/register", async (req, res) => {
         role: user.role,
         avatar: user.avatar,
       },
-      token, // Include token for frontend to store
+      token,
     });
   } catch (err) {
     console.error("Register error:", err);
     res.status(500).json({ message: "Server error" });
   }
-});
+};
+
+router.post("/sign-up", registerHandler);
+router.post("/register", registerHandler);
 
 /* ===========================
    LOGIN
@@ -93,7 +94,7 @@ router.post("/log-in", async (req, res) => {
   try {
     await connectToDatabase();
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user || !user.password) {
       return res.status(400).json({ message: "Invalid credentials" });
     }

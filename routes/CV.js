@@ -1,7 +1,8 @@
 import express from "express";
 import isAuth from "../middlewares/isAuth.middleware.js";
 import { addCV, checkoutCV, getMarketplace, getMyCV, getUserCVs, publishCV } from "../controllers/cvController.js";
-import { upload } from "../config/cloudinary.config.js";
+import { upload, uploadMultiple } from "../config/cloudinary.config.js";
+import CV from "../models/CV.js";
 
 const router = express.Router();
 
@@ -11,7 +12,7 @@ const router = express.Router();
 router.post("/", isAuth, addCV);
 
 /* =======================
-    UPLOAD CV PROFILE IMAGE
+    UPLOAD CV PROFILE IMAGE (SINGLE)
 ======================= */
 router.post("/upload", upload.single("image"), async (req, res) => {
   try {
@@ -22,6 +23,25 @@ router.post("/upload", upload.single("image"), async (req, res) => {
     res.status(200).json({ message: "Image uploaded successfully", imageUrl });
   } catch (err) {
     res.status(500).json({ message: "Failed to upload image" });
+  }
+});
+
+/* =======================
+    UPLOAD CV MULTIPLE IMAGES
+======================= */
+router.post("/upload-multiple", uploadMultiple, async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "No files uploaded" });
+    }
+    // Get all Cloudinary URLs
+    const imageUrls = req.files.map(file => file.path);
+    res.status(200).json({ 
+      message: "Images uploaded successfully", 
+      imageUrls 
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to upload images" });
   }
 });
 

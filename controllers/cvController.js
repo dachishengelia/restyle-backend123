@@ -3,7 +3,7 @@ import Stripe from "stripe";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export const addCV = async (req, res) => {
-  const { height, weight, nationality, languages, instagram, email, profileImage, description } = req.body;
+  const { height, weight, nationality, languages, instagram, email, profileImage, imageUrls, description } = req.body;
 
   // Validation
   if (!height || !weight || !nationality || !languages || !email) {
@@ -27,6 +27,9 @@ export const addCV = async (req, res) => {
       });
     }
 
+    // Use first imageUrl as profileImage if profileImage not provided
+    const mainImage = profileImage || (imageUrls && imageUrls.length > 0 ? imageUrls[0] : null);
+
     const cv = new CV({
       userId: req.userId,
       height: parseFloat(height),
@@ -35,7 +38,8 @@ export const addCV = async (req, res) => {
       languages,
       instagram: instagram || null,
       email,
-      profileImage: profileImage || null,
+      profileImage: mainImage,
+      imageUrls: imageUrls || [],
       description: description || null,
     });
 
@@ -55,10 +59,10 @@ export const addCV = async (req, res) => {
 };
 
 export const checkoutCV = async (req, res) => {
-  const { height, weight, nationality, languages, instagram, email, profileImage, description } = req.body;
+  const { height, weight, nationality, languages, instagram, email, profileImage, imageUrls, description } = req.body;
 
   // Validation
-  if (!height || !weight || !nationality || !languages || !email || !profileImage) {
+  if (!height || !weight || !nationality || !languages || !email) {
     return res.status(400).json({
       message: "Height, weight, nationality, languages, email, and profileImage are required"
     });
@@ -73,6 +77,10 @@ export const checkoutCV = async (req, res) => {
   try {
     // Check if user already has a CV
     let cv = await CV.findOne({ userId: req.userId });
+    
+    // Use first imageUrl as profileImage if profileImage not provided
+    const mainImage = profileImage || (imageUrls && imageUrls.length > 0 ? imageUrls[0] : null);
+
     if (cv) {
       // Update existing CV
       cv.height = parseFloat(height);
@@ -81,7 +89,8 @@ export const checkoutCV = async (req, res) => {
       cv.languages = languages;
       cv.instagram = instagram || null;
       cv.email = email;
-      cv.profileImage = profileImage;
+      cv.profileImage = mainImage;
+      cv.imageUrls = imageUrls || [];
       cv.description = description || null;
       cv.isPublished = false; // Reset to unpublished to allow republishing
     } else {
@@ -94,7 +103,8 @@ export const checkoutCV = async (req, res) => {
         languages,
         instagram: instagram || null,
         email,
-        profileImage,
+        profileImage: mainImage,
+        imageUrls: imageUrls || [],
         description: description || null,
         isPublished: false,
       });
