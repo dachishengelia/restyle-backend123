@@ -1,28 +1,29 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import express from "express";
-const app = express();
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import passport from "./strategies/google.strategy.js";
-import authRoutes from "./routes/auth.js";
-import adminRoutes from "./routes/admin.js";
-import SellerRoutes from "./routes/seller.js";
-import CartRoutes from "./routes/CartRoutes.js";
-import productRoutes from "./routes/Product.js";
-import productActionsRoutes from "./routes/productActions.js";
-import checkoutRoutes from "./routes/checkout.js";
-import usersRoutes from "./routes/users.js";
-import profileRoutes from "./routes/profile.js";
-import cvRoutes from "./routes/CV.js";
-import cvActionsRoutes from "./routes/cvActions.js";
-import statsRoutes from "./routes/stats.js";
-import reviewsRoutes from "./routes/reviews.js";
-import favoritesRoutes from "./routes/favorites.js";
-import messagesRoutes from "./routes/messages.js";
-import connectToDb from "./db/connectToDB.js";
+import dotenv from "dotenv";
+dotenv.config();
+
+import passport from "../strategies/google.strategy.js";
+import authRoutes from "../routes/auth.js";
+import adminRoutes from "../routes/admin.js";
+import SellerRoutes from "../routes/seller.js";
+import CartRoutes from "../routes/CartRoutes.js";
+import productRoutes from "../routes/Product.js";
+import productActionsRoutes from "../routes/productActions.js";
+import checkoutRoutes from "../routes/checkout.js";
+import usersRoutes from "../routes/users.js";
+import profileRoutes from "../routes/profile.js";
+import cvRoutes from "../routes/CV.js";
+import cvActionsRoutes from "../routes/cvActions.js";
+import statsRoutes from "../routes/stats.js";
+import reviewsRoutes from "../routes/reviews.js";
+import favoritesRoutes from "../routes/favorites.js";
+import messagesRoutes from "../routes/messages.js";
+import connectToDb from "../db/connectToDB.js";
+
+const app = express();
 
 const allowedOrigins = [
   process.env.FRONTEND_URL,
@@ -44,7 +45,6 @@ app.use(cors({
   methods: ["GET","POST","PUT","DELETE","PATCH","OPTIONS"]
 }));
 
-// Handle preflight requests
 app.options("*", cors({
   origin: allowedOrigins,
   credentials: true,
@@ -63,9 +63,6 @@ app.use(cookieParser());
 app.use(express.static("public"));
 app.use(passport.initialize());
 
-console.log("Frontend URL:", process.env.FRONTEND_URL);
-
-// --- Routes ---
 app.use("/api/auth", authRoutes);
 app.use("/api/product-actions", productActionsRoutes);
 app.use("/admin", adminRoutes);
@@ -90,51 +87,16 @@ app.get("/", (req, res) => {
   `);
 });
 
-// Global error handler - ensure all errors return JSON
 app.use((err, req, res, next) => {
   console.error("Global error handler:", err);
-  
-  // Check if response is already sent
-  if (res.headersSent) {
-    return next(err);
-  }
-  
-  // Return JSON error response
+  if (res.headersSent) return next(err);
   res.status(err.status || 500).json({
     message: err.message || "Internal Server Error",
     error: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });
 
-// Connect to database (non-blocking for serverless)
-connectToDb().catch(err => {
-  console.error('MongoDB connection failed:', err.message);
-});
+// Connect to database
+connectToDb().catch(console.error);
 
-// Start server locally only (not on Vercel serverless)
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-  const PORT = process.env.PORT || 3000;
-  const startServer = (port) => {
-    const server = app.listen(port, () => {
-      console.log(`Server running locally on port ${port}`);
-    });
-    
-    server.on('error', (err) => {
-      if (err.code === 'EADDRINUSE' && port < 3010) {
-        console.log(`Port ${port} in use, trying ${port + 1}...`);
-        startServer(port + 1);
-      } else {
-        console.error('Server error:', err);
-      }
-    });
-    
-    return server;
-  };
-  startServer(PORT);
-} else {
-  console.log('Running on Vercel serverless');
-}
-
-// Export Express app for Vercel serverless functions
-console.log('Exporting Express app...');
 export default app;
