@@ -110,4 +110,5 @@ if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
   app.listen(PORT, () => console.log(`Server running locally on port ${PORT}`));
 }
 
+export { app };
 export default app;
